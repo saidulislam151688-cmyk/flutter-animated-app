@@ -1,43 +1,35 @@
-name: Build Debug APK
+name: Flutter Build
 
 on:
   push:
     branches: [ master ]
-  workflow_dispatch:
+  pull_request:
+    branches: [ master ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    
     steps:
-    - name: Debug info
-      run: |
-        echo "Starting workflow..."
-        whoami
-        pwd
-    
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 1
-    
-    - name: Show files
-      run: ls -la
-    
-    - name: Set up Flutter
-      uses: subosito/flutter-action@v2
-      with:
-        flutter-version: '3.24.5'
-    
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v2
-    
-    - name: Get dependencies
-      run: flutter pub get
-    
-    - name: Build debug APK
-      run: flutter build apk --debug 2>&1
-    
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: app-debug.apk
-        path: build/app/outputs/flutter-apk/app-debug.apk
+      - uses: actions/checkout@v4
+      
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.5'
+          
+      - name: Add Android SDK to path
+        run: echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_PATH
+        
+      - run: flutter pub get
+      
+      - run: flutter test
+      
+      - run: flutter build apk --debug
+        env:
+          ANDROID_HOME: /opt/android-sdk
+          ANDROID_SDK_ROOT: /opt/android-sdk
+          
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app-debug.apk
+          path: build/app/outputs/flutter-apk/app-debug.apk
