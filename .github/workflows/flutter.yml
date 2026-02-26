@@ -27,6 +27,9 @@ jobs:
       with:
         flutter-version: '3.24.5'
     
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v2
+    
     - name: Get dependencies
       run: flutter pub get
     
